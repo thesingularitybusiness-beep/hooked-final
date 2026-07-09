@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hooked.</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Clash+Grotesk:wght@600;700&family=Inter:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; }
+    .App { max-width: 700px; margin: 60px auto; padding: 20px; }
+    h1 { font-size: 56px; font-weight: 700; font-family: 'Clash Grotesk'; margin-bottom: 12px; }
+    p { color: #999; margin-bottom: 40px; }
+    form { display: flex; gap: 10px; margin-bottom: 40px; }
+    input { flex: 1; padding: 14px 16px; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; color: #fff; font-size: 14px; }
+    input:focus { outline: none; border-color: #E63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+    button { padding: 14px 24px; background: #E63946; color: #000; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    button:hover:not(:disabled) { background: #ff5a68; transform: translateY(-2px); }
+    button:disabled { opacity: 0.6; }
+    .result { background: #0a0a0a; border: 1px solid #1a1a1a; border-left: 4px solid #E63946; border-radius: 8px; padding: 32px; margin-top: 40px; }
+    .output { white-space: pre-wrap; line-height: 1.8; font-size: 14px; color: #ccc; }
+    .output p { margin: 10px 0; }
+    .output p:first-child { color: #E63946; font-weight: 600; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="App">
+    <h1>hooked.</h1>
+    <p>Diagnose why your short-form video underperforms</p>
+    <form id="form">
+      <input type="text" id="url" placeholder="Paste YouTube Shorts, TikTok, or Instagram Reels link" required />
+      <button type="submit" id="btn">Analyze Video</button>
+    </form>
+    <div id="result"></div>
+  </div>
+  <script>
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('url').value.trim();
+      if (!url) return alert('Paste a video link');
+      const btn = document.getElementById('btn');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing...';
+      try {
+        const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoUrl: url }) });
+        const data = await res.json();
+        document.getElementById('result').innerHTML = `<div class="result"><div class="output">${data.analysis.split('\n').map(line => `<p>${line}</p>`).join('')}</div></div>`;
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Analyze Video';
+      }
+    });
+  </script>
+</body>
+</html>
